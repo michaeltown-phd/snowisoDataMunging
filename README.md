@@ -9,3 +9,5 @@ The snow was collected at EastGRIP from 2016-2019. The snow was then processed f
 The code here cleans and merges the data from the two different institutions into a single data frame. It then processes the metadata from the field and includes important information into a second data frame. Select fields from the second data frame is included in the primary data frame with the isotope data.
 
 Initial QC, EDA, error correlations, and a look at dxs patterns are included in this analysis.
+
+Contact michael.town@uib.no with any questions.
