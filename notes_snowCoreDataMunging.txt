@@ -1,0 +1,647 @@
+--> 31 Jan 2022
+
+Next steps for snow core data munging
+
+1. set initial depth scale based on annual documentation of what each year protocol was
+2. import field notes as df from each field season 
+3. create binary hoar/break/crust columns
+4. apply compression across depth scale
+
+
+review of missing or strange data in the snowiso data set
+
+missing data from d18O and dD analysis filled in as NaN
+SP2_160706_1015L_15 nan     nan     nan     nan
+SP5_20190529_01	nan	nan	nan	nan
+SP5_20190529_02	nan	nan	nan	nan
+SP5_20190529_07	nan	nan	nan	nan
+SP5_20190529_09	nan	nan	nan	nan
+SP5_20190529_10	nan	nan	nan	nan
+
+
+removed from analysis
+
+SP_160727_1200L_13	-39.998	0.027968732541893	-309.677	0.154303880378939	two bags or illegible, not sure where it belongs
+
+
+Other strange occurrences -
+
+These seem to be extra samples that I have not accounted for`
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160717', '1745L', '14N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160720', '0940L', '14N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160720', '0940L', '18N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160720', '0940L', '19N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160729', '0945L', '12N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160730', '0900L', '03N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160801', '0900L', '16N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160801', '0900L', '17N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160804', '0940L', '05N', '1']
+sample name length is not 3 or 4 elements, including the SP prefix.
+['SP', '160804', '0940L', '09N', '1']
+
+What does it mean when there is an N in the sample name? Nachmessung - final measurement?
+
+What do 'MW', D?, N mean?
+e.g. -SP4_20190715_42_MW
+
+Complete list of funky samples:
+['SP5', '20170505', '08N']
+['SP5', '20170505', '09N']
+['SP5', '20170505', '10N']
+['SP5', '20170505', '11NN']
+['SP5', '20170505', '12N']
+['SP5', '20170505', '13N']
+['SP5', '20170505', '14N']
+['SP5', '20170505', '15N']
+['SP5', '20170505', '16N']
+['SP5', '20170505', '17N']
+['SP5', '20170505', '18N']
+['SP5', '20170505', '19N']
+['SP5', '20170505', '20N']
+['SP5', '20170505', '21N']
+['SP5', '20170505', '22N']
+['SP5', '20170505', '23N']
+['SP5', '20170505', '24N']
+['SP5', '20170505', '25NN']
+['SP5', '20170505', '26NN']
+['SP5', '20170505', '27N']
+['SP5', '20170505', '28N']
+['SP5', '20170505', '29N']
+['SP5', '20170505', '30N']
+['SP5', '20170505', '31N']
+['SP5', '20170505', '32N']
+['SP5', '20170505', '33N']
+['SP5', '20170505', '34N']
+['SP5', '20170505', '35N']
+['SP5', '20170505', '36N']
+['SP5', '20170505', '37N']
+['SP5', '20170505', '38N']
+['SP5', '20170505', '39N']
+['SP1', '20170526', '03N']
+['SP1', '20170526', '05N']
+['SP2', '20170526', '07N']
+['SP3', '20170526', '12N']
+['SP3', '20170526', '37N']
+['SP4', '20170526', '44N']
+['SP4', '20170526', '45N']
+['SP4', '20170526', '46N']
+['SP3', '20170607', '08N']
+['SP3', '20170607', '34N']
+['SP4', '20170607', '19N']
+['SP4', '20170628', '14N']
+['SP4', '20170628', '15N']
+['SP5', '20170628', '03N']
+['SP5', '20170628', '04N']
+['SP5', '20170628', '05N']
+['SP1', '20170713', '15N']
+['SP1', '20170713', '30N']
+['SP1', '20170713', '42N']
+['SP2', '20170713', '08N']
+['SP2', '20170713', '10NN']
+['SP2', '20170713', '42N']
+['SP3', '20170713', '12N']
+['SP3', '20170713', '20N']
+['SP3', '20170713', '24N']
+['SP3', '20170713', '30N']
+['SP3', '20170713', '32N']
+['SP4', '20170713', '06N']
+['SP4', '20170713', '11N']
+['SP4', '20170713', '13N']
+['SP4', '20170713', '14N']
+['SP4', '20170713', '17N']
+['SP4', '20170713', '37N']
+['SP5', '20170713', '08N']
+['SP5', '20170713', '09N']
+['SP5', '20170713', '10N']
+['SP5', '20170713', '11N']
+['SP5', '20170713', '18N']
+['SP5', '20170713', '22N']
+['SP5', '20170713', '23N']
+['SP5', '20170713', '27NN']
+['SP5', '20170713', '31N']
+['SP5', '20170713', '37NN']
+['SP5', '20170713', '38N']
+['SP2', '20170716', '12N']
+['SP2', '20170805', '01N']
+['SP2', '20170805', '02N']
+['SP2', '20170805', '03N']
+['SP2', '20170805', '04N']
+['SP2', '20170805', '05N']
+['SP2', '20170805', '06N']
+['SP2', '20170805', '07N']
+['SP2', '20170805', '08N']
+['SP2', '20170805', '09N']
+['SP2', '20170805', '10N']
+['SP2', '20170805', '11N']
+['SP2', '20170805', '12N']
+['SP2', '20170805', '13N']
+['SP2', '20170805', '14N']
+['SP2', '20170805', '15N']
+['SP2', '20170805', '16N']
+['SP2', '20170805', '17N']
+['SP2', '20170805', '18N']
+['SP2', '20170805', '19N']
+['SP3', '20170805', '45N']
+['SP4', '20170809', '03N']
+['SP4', '20170809', '10N']
+['SP4', '20170809', '14N']
+['SP1', '20170811', '19N']
+['SP1', '20170811', '27N']
+['SP1', '20170811', '31N']
+['SP1', '20170811', '34N']
+['SP2', '20170811', '32N']
+['SP2', '20170811', '41N']
+['SP3', '20170811', '23N']
+['SP4', '20170811', '06N']
+['SP4', '20170811', '22N']
+['SP4', '20170811', '23N']
+['SP4', '20170811', '34N']
+['SP4', '20170811', '43N']
+['SP5', '20170811', '15N']
+['SP5', '20170811', '16N']
+['SP5', '20170811', '18N']
+['SP5', '20170811', '21N']
+['SP5', '20170811', '23N']
+['SP5', '20170811', '34N']
+['SP5', '20170811', '36N']
+['SP5', '20170811', '37N']
+['SP5', '20170811', '38N']
+['SP5', '20170811', '39N']
+['SP5', '20170811', '40N']
+['SP1', '20180512', '14N']
+['SP1', '20180512', '15N']
+['SP1', '20180512', '16N']
+['SP1', '20180512', '28N']
+['SP5', '20180512', '06N']
+['SP5', '20180512', '07N']
+['SP5', '20180512', '11N']
+['SP1', '20180527', '09N']
+['SP1', '20180527', '28N']
+['SP1', '20180608', '19N']
+['SP1', '20180608', '20N']
+['SP1', '20180622', '02N']
+['SP1', '20180707', '05N']
+['SP1', '20180707', '19N']
+['SP1', '20180707', '20N']
+['SP1', '20180707', '21N']
+['SP1', '20180707', '27NN']
+['SP1', '20180707', '43N']
+['SP1', '20180806', '16N']
+['SP1', '20180806', '35N']
+['SP5', '20180806', '27N']
+['SP5', '20180806', '28N']
+['SP5', '20180806', '29N']
+['SP5', '20180806', '30N']
+['SP5', '20180806', '31N']
+['SP5', '20180806', '32N']
+['SP5', '20180806', '33N']
+['SP5', '20180806', '34N']
+['SP5', '20180806', '35N']
+['SP5', '20180806', '42N']
+['SP1', '20190611', '08N']
+['SP1', '20190611', '09N']
+['SP1', '20190611', '10N']
+['SP1', '20190611', '11N']
+['SP1', '20190611', '12N']
+['SP1', '20190611', '13N']
+['SP1', '20190611', '14N']
+['SP1', '20190611', '15N']
+['SP2', '20190611', '12N']
+['SP2', '20190611', '41N']
+['SP2', '20190611', '42N']
+['SP3', '20190611', '06N']
+['SP4', '20190611', '21N']
+['SP4', '20190611', '39N']
+['SP4', '20190611', '43N']
+['SP5', '20190611', '14N']
+['SP5', '20190611', '24N']
+['SP1', '20190626', '12N']
+['SP2', '20190626', '05(N)']
+['SP2', '20190626', '27N']
+['SP2', '20190626', '42(N)']
+['SP2', '20190626', '44N']
+['SP5', '20190626', '02N']
+['SP5', '20190626', '15N']
+['SP5', '20190626', '26N']
+['SP5', '20190626', '33N']
+['SP1', '20190715', '01N']
+['SP1', '20190715', '04N']
+['SP1', '20190715', '05N']
+['SP1', '20190715', '06N']
+['SP1', '20190715', '24N']
+['SP1', '20190715', '36N']
+['SP1', '20190715', '47N']
+['SP2', '20190715', '13N']
+['SP2', '20190715', '22N']
+['SP2', '20190715', '23N']
+['SP3', '20190715', '01N']
+['SP3', '20190715', '02N']
+['SP3', '20190715', '30N']
+['SP3', '20190715', '34N']
+['SP3', '20190715', '42N']
+['SP4', '20190715', '02N']
+['SP4', '20190715', '06N']
+['SP4', '20190715', '10N']
+['SP4', '20190715', '32N']
+['SP4', '20190715', '36N']
+['SP4', '20190715', '42MW']
+['SP5', '20190715', '02N']
+['SP5', '20190715', '19N']
+['SP5', '20190715', '26N']
+['SP5', '20190715', '31N']
+['SP1', '20190724', '31(N)']
+['SP1', '20190724', '41(N)']
+['SP3', '20190724', '21(N)']
+['SP3', '20190724', '25(N)']
+['SP3', '20190724', '33(N)']
+['SP3', '20190724', '40(N)']
+['SP3', '20190724', '42N']
+['SP3', '20190724', '46(N)']
+['SP3', '20190724', '48(N)']
+
+10 cases of nan depth sample numbers
+
+
+--> 15 Feb 2022
+created ods files for the meta data, dropped some irrelevant sheets and some columns from each of the remaining sheets.
+
+there are no meta data (breaks, compression, etc...) for 2016
+
+
+--> 16 Feb 2022
+edited the 2017 data to clear notes column of hoar and compaction. 
+
+--> 17 Feb 2022
+
+1. what are the uncertainty in each individual isotope measurement?
+
+some of the indexes are messed up for 2018 and my profile plotting script is not adequate for 2016.
+
+for 2016, it may be better to try to color the profiles by date.
+
+Still need to add the accumulation. 
+
+There are some interesting signals in these data, for sure.
+
+Some strange missing data in 2019 in the top of some profiles. 
+
+it looks like there might be some confusion about the 2018 sampling between awi and the field notes. there are many missing sp2-5 data, and a whole bunch of sp1. so, will have to sort out which were which.
+
+--> 24 Feb 2022
+The issue here was my confusion about where the data were. Some data were analyzed in iceland, and existed in different data files. Summarizing some of that information here.
+
+SP_2017
+SP_2018
+SP_2019
+
+will include these in the analysis this weekend.
+
+--> 25 Feb 2022
+munging through the iceland data, finding some tricks to keep the ingestion of the data clean. Some examples: there are many columns without data (nan) - drop these, there are some some comment columns with info - we must drop those now, but read them later.
+
+for july 4, 10 of 2017 there are no d18O values
+
+made *.ods file for each data file from iceland. these have been modified for when there is missing d18O values (e.g. setting -999 for now, then cleaning later)
+
+The next steps here are to include 2018 and 2019 into the python script. I see this as just including in a loop and then making sure the rows add up. Probably there will be some other data anomalies in the spreadsheets to account for. After this, then change the column names again to match the awi column names.
+
+
+--> 28 Feb 2022
+OK, the place I'm at now is that the iceland data are loaded and pickled but there may be some sample name elements that are nan. when I append the pickled iceland-processed data, then run the original snowcore isotope data munging script it chokes on a day format where there is an nan value. 
+
+So, the next step is to drop rows with nan values in the sample name in the iceland script, repickle the data, then rerun the original data munging script.
+
+The goal here would be to have new plots of mean profiles to share with TJ fudge on 1 Marh 2022.
+
+--> 2 Mar 2022
+There were a couple of rows that had an 'a' and 'b' value. I removed one of them in these two cases. 
+from:SP3_20170726_39a,b kept a cut b
+
+SP3_20170726_34	-39,09	0,02	-307,40	0,18
+SP3_20170726_35	-38,67	0,03	-303,13	0,24
+SP3_20170726_36	-38,08	0,03	-297,34	0,37
+SP3_20170726_37	-37,11	0,03	-288,00	0,42
+SP3_20170726_38	-35,99	0,05	-278,79	0,45
+SP3_20170726_39a	-31,74	0,02	-251,06	0,29
+SP3_20170726_39b	-33,31	0,02	-259,25	0,21
+SP3_20170726_40	-32,51	0,03	-253,21	0,37
+SP3_20170726_41	-32,73	0,01	-257,19	0,04
+SP3_20170726_42	-33,07	0,02	-261,59	0,14
+SP3_20170726_43	-34,59	0,04	-274,85	0,41
+SP3_20170726_44	-35,61	0,02	-282,63	0,21
+
+did some data cleaning in the meta data today also.
+There were some comments in the break files that needed filtering. Some dates that were reversed. Needed to run the meta data dataframe creator again.
+
+Break assignments seem to be looping but need checking because it is not assigning the '1's to the correct places, and there is a problem with some 'breaks' columns not having any elements in them. Could be how I'm calling them in pandas.
+
+Reminder - the naming convention for 2016 of the samples did not include the full year. Will need to be careful about sorting with this nuance. It may be useful to go back and fix this for future ease of use.
+
+--> 3 Mar 2022
+The next step is to create a list of the sample names with breaks (created) and then set all values in df_iso.breaks when breaksAll is equal to df_iso.index to 1.
+
+So, I was able to assign some breaks, but not all. These are the ones that are missing
+
+SP2_20190626_44
+SP1_20190715_06
+SP3_20190715_02
+SP5_20190715_02
+SP5_20190715_19
+SP5_20190715_31
+SP5_20190715_31
+SP3_20190724_21
+SP3_20190724_21
+SP1_20180608_19
+SP1_20180608_20
+SP2_20180512_08
+SP2_20180608_06
+SP2_20180622_04
+SP2_20180622_09
+SP2_20180721_06
+SP2_20180721_07
+SP3_20180806_01
+SP3_20180806_01
+SP3_20180806_02
+SP3_20180806_03
+SP4_20180622_01
+SP4_20180622_08
+SP4_20180721_04
+SP4_20180806_01
+SP4_20180806_01
+SP4_20180806_02
+SP4_20180806_05
+SP5_20180512_07
+SP5_20180527_06
+SP5_20180721_05
+SP5_20180806_33
+SP1_20170502_07
+SP1_20170502_08
+SP1_20170514_09
+SP1_20170514_14
+SP1_20170514_16
+SP1_20170514_17
+SP1_20170514_23
+SP1_20170514_27
+SP1_20170514_27
+SP1_20170514_33
+SP1_20170526_47
+SP1_20170625_09
+SP1_20170625_10
+SP1_20170625_11
+SP1_20170625_11
+SP1_20170625_12
+SP1_20170719_11
+SP1_20170719_12
+SP1_20170719_12
+SP2_20170502_04
+SP2_20170505_07
+SP2_20170505_08
+SP2_20170505_12
+SP2_20170505_14
+SP2_20170505_16
+SP2_20170505_19
+SP2_20170505_21
+SP2_20170505_22
+SP2_20170505_27
+SP2_20170505_37
+SP2_20170526_07
+SP2_20170713_42
+SP2_20170719_04
+SP2_20170719_12
+SP2_20170719_13
+SP2_20170719_13
+SP3_20170502_04
+SP3_20170502_05
+SP3_20170505_04
+SP3_20170514_03
+SP3_20170514_07
+SP3_20170514_08
+SP3_20170514_13
+SP3_20170514_14
+SP3_20170514_24
+SP3_20170526_12
+SP3_20170625_08
+SP3_20170625_09
+SP3_20170713_12
+SP3_20170713_20
+SP3_20170719_03
+SP3_20170719_13
+SP3_20170719_13
+SP3_20170719_14
+SP3_20170719_14
+SP3_20170726_06
+SP4_20170505_03
+SP4_20170505_04
+SP4_20170505_07
+SP4_20170514_04
+SP4_20170514_10
+SP4_20170514_15
+SP4_20170514_18
+SP4_20170514_18
+SP4_20170514_22
+SP4_20170514_25
+SP4_20170514_28
+SP4_20170514_46
+SP4_20170529_06
+SP4_20170529_11
+SP4_20170702_01
+SP4_20170702_02
+SP4_20170702_08
+SP4_20170710_09
+SP4_20170713_13
+SP4_20170713_13
+SP4_20170713_14
+SP4_20170713_17
+SP4_20170722_04
+SP4_20170722_05
+SP4_20170722_13
+SP4_20170722_14
+SP4_20170726_03
+SP4_20170726_04
+SP5_20170505_08
+SP5_20170505_11
+SP5_20170505_23
+SP5_20170607_08
+SP5_20170607_15
+SP5_20170607_17
+SP5_20170607_18
+SP5_20170607_23
+SP5_20170607_31
+SP5_20170607_42
+SP5_20170622_03
+SP5_20170622_04
+SP5_20170702_08
+SP5_20170702_09
+SP5_20170707_06
+SP5_20170710_09
+SP5_20170713_22
+SP5_20170713_22
+SP5_20170719_03
+SP5_20170719_04
+SP5_20170719_14
+SP5_20170719_15
+SP5_20170719_15
+SP5_20170719_16
+SP5_20170719_16
+SP5_20170722_05
+SP5_20170722_14
+SP5_20170722_14
+SP5_20170726_04
+SP5_20170726_05
+SP5_20170726_07
+
+OK, figured out that iceland did not adhere to naming convention, and so the breaks in the top 10 cm of the cores are currently left out. 
+
+also, there are some cores in the meta data that did not get analyzed.
+
+--> all data that had 'few samples' have been removed
+SP4_20170628
+SP5_20170628
+
+
+--> fixed the naming convention issue in the iceland data (first 10 cm were nameed differently)
+
+these data seem empty (~104 data points)
+they pop up when assigning break points it seems. 
+SP2_20190626_44
+SP1_20190715_06
+SP3_20190715_02
+SP5_20190715_02
+SP5_20190715_19
+SP5_20190715_31
+SP5_20190715_31
+SP3_20190724_21
+SP3_20190724_21
+SP1_20180608_19
+SP1_20180608_20
+SP5_20180512_07
+SP5_20180806_33
+SP1_20170514_09
+SP1_20170514_14
+SP1_20170514_16
+SP1_20170514_23
+SP1_20170514_27
+SP1_20170514_33
+SP1_20170526_47
+SP1_20170625_09
+SP1_20170625_10
+SP1_20170625_11
+SP1_20170625_11
+SP1_20170625_12
+SP1_20170719_11
+SP1_20170719_12
+SP1_20170719_12
+SP2_20170505_07
+SP2_20170505_12
+SP2_20170505_14
+SP2_20170505_16
+SP2_20170505_19
+SP2_20170505_21
+SP2_20170505_27
+SP2_20170505_37
+SP2_20170526_07
+SP2_20170719_04
+SP2_20170719_12
+SP2_20170719_13
+SP2_20170719_13
+SP3_20170514_03
+SP3_20170514_07
+SP3_20170514_13
+SP3_20170514_24
+SP3_20170625_08
+SP3_20170713_12
+SP3_20170713_20
+SP3_20170719_03
+SP3_20170719_13
+SP3_20170719_13
+SP3_20170719_14
+SP3_20170719_14
+SP4_20170514_04
+SP4_20170514_10
+SP4_20170514_15
+SP4_20170514_18
+SP4_20170514_22
+SP4_20170514_25
+SP4_20170514_28
+SP4_20170514_46
+SP4_20170529_06
+SP4_20170529_11
+SP4_20170713_13
+SP4_20170713_13
+SP4_20170713_14
+SP4_20170713_17
+SP4_20170722_04
+SP4_20170722_05
+SP4_20170722_13
+SP4_20170722_14
+SP5_20170505_11
+SP5_20170505_23
+SP5_20170607_08
+SP5_20170607_15
+SP5_20170607_17
+SP5_20170607_18
+SP5_20170607_23
+SP5_20170607_31
+SP5_20170607_42
+SP5_20170622_03
+SP5_20170713_22
+SP5_20170713_22
+SP5_20170719_03
+SP5_20170719_14
+SP5_20170719_15
+SP5_20170719_15
+SP5_20170719_16
+SP5_20170719_16
+SP5_20170722_05
+SP5_20170722_14 
+
+--> these are data that seem to not have been sampled for one reason or another.
+
+8 Mar 2022
+--> included the hoar frost elements, just looking at how to best plot them now
+fixed a lot of the naming convention issues in the sample names
+
+9 Mar 2022
+questions to record:
+what are the individual uncertainties in each measurement? These are the standard deviations reported by AVI/Iceland
+
+These rows are causing trouble as duplicates. I don't know what is going on here, but I will drop these for the moment and proceed with adding the accumulation values
+
+working in snowCoreDataEDA_individualCores_2016-2019
+                           d18O  d18O_std  ...   sampleNames  depthAcc
+Sample                                     ...                        
+SP2_20160625_03       -28.74450  0.059281  ...  SP2_20160625       NaN
+SP2_20160625_17       -35.25100  0.022394  ...  SP2_20160625       NaN
+SP1_20160626_1800_04  -33.73750  0.045434  ...  SP1_20160626       NaN
+SP1_20160704_2030L_07 -31.44300  0.030356  ...  SP1_20160704       NaN
+SP1_20160713_0730L_07 -31.59425  0.021925  ...  SP1_20160713       NaN
+SP1_20160721_1640L_16 -36.65875  0.019690  ...  SP1_20160721       NaN
+SP1_20160726_1100L_16 -42.48425  0.014202  ...  SP1_20160726       NaN
+SP5_20190529_01       -25.24000  0.040000  ...  SP5_20190529       NaN
+SP5_20190529_02       -26.51000  0.010000  ...  SP5_20190529       NaN
+SP5_20190529_03             NaN       NaN  ...  SP5_20190529       NaN
+SP5_20190529_04             NaN       NaN  ...  SP5_20190529       NaN
+SP5_20190529_05             NaN       NaN  ...  SP5_20190529       NaN
+SP5_20190529_06             NaN       NaN  ...  SP5_20190529       NaN
+SP5_20190529_07       -40.59000  0.040000  ...  SP5_20190529       NaN
+SP5_20190529_08             NaN       NaN  ...  SP5_20190529       NaN
+SP5_20190529_09       -38.37000  0.040000  ...  SP5_20190529       NaN
+SP5_20190529_10       -37.42000  0.030000  ...  SP5_20190529       NaN
+These don't look duplicated to me, and the accumulation values are not zero here, so more than one thing is going wrong.
+
+qc on last two profiles in 2017. missing field notes on these cores
+
+--> dxs vs d18O 
+some inconclusive scatter plotting here, but possibly some important things
+will summarize in research notebook
+
+
