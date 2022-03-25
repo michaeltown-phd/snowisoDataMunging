@@ -236,37 +236,44 @@ df_EGRIP_SCiso['depth'] = df_EGRIP_SCiso.sampleDepthNum.apply(depthScaleSampNum)
 # compute dexcess
 df_EGRIP_SCiso['dexcess'] = df_EGRIP_SCiso.dD - dexcessSlope*df_EGRIP_SCiso.d18O
 
+
+# dxsln 
+dD_ln = np.log(df_EGRIP_SCiso.dD/1000+1)*1000
+d18O_ln = np.log(df_EGRIP_SCiso.d18O/1000+1)*1000
+df_EGRIP_SCiso['dxsln'] = dD_ln - ((-2.85*10**-2)*d18O_ln**2+8.47*d18O_ln)
+
+
 df_EGRIP_SCiso['sampleNames'] = 'SP'+df_EGRIP_SCiso.coreID.map(str)+'_'+df_EGRIP_SCiso.year.map(str)+df_EGRIP_SCiso.month.apply(dayMonthStr)+df_EGRIP_SCiso.day.apply(dayMonthStr)
 
 
 # stats on grouped data.
-columnsToProcess = ['d18O','dD','dexcess']
+columnsToProcess = ['d18O','dD','dexcess','dxsln']
 
 df_EGRIP_profiles_2016 = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].mean()
-df_EGRIP_profiles_2016[['d18O_std','dD_std','dexcess_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].std()
-df_EGRIP_profiles_2016[['d18O_max','dD_max','dexcess_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].max()
-df_EGRIP_profiles_2016[['d18O_min','dD_min','dexcess_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].min()
-df_EGRIP_profiles_2016[['d18O_num','dD_num','dexcess_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].count()
+df_EGRIP_profiles_2016[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].std()
+df_EGRIP_profiles_2016[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].max()
+df_EGRIP_profiles_2016[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].min()
+df_EGRIP_profiles_2016[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2016].groupby(['depth'])[columnsToProcess].count()
 
 df_EGRIP_profiles_2017 = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].mean()
-df_EGRIP_profiles_2017[['d18O_std','dD_std','dexcess_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].std()
-df_EGRIP_profiles_2017[['d18O_max','dD_max','dexcess_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].max()
-df_EGRIP_profiles_2017[['d18O_min','dD_min','dexcess_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].min()
-df_EGRIP_profiles_2017[['d18O_num','dD_num','dexcess_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].count()
+df_EGRIP_profiles_2017[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].std()
+df_EGRIP_profiles_2017[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].max()
+df_EGRIP_profiles_2017[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].min()
+df_EGRIP_profiles_2017[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2017].groupby(['depth'])[columnsToProcess].count()
 
 
 df_EGRIP_profiles_2018 = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].mean()
-df_EGRIP_profiles_2018[['d18O_std','dD_std','dexcess_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].std()
-df_EGRIP_profiles_2018[['d18O_max','dD_max','dexcess_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].max()
-df_EGRIP_profiles_2018[['d18O_min','dD_min','dexcess_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].min()
-df_EGRIP_profiles_2018[['d18O_num','dD_num','dexcess_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].count()
+df_EGRIP_profiles_2018[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].std()
+df_EGRIP_profiles_2018[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].max()
+df_EGRIP_profiles_2018[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].min()
+df_EGRIP_profiles_2018[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2018].groupby(['depth'])[columnsToProcess].count()
 
 
 df_EGRIP_profiles_2019 = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].mean()
-df_EGRIP_profiles_2019[['d18O_std','dD_std','dexcess_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].std()
-df_EGRIP_profiles_2019[['d18O_max','dD_max','dexcess_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].max()
-df_EGRIP_profiles_2019[['d18O_min','dD_min','dexcess_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].min()
-df_EGRIP_profiles_2019[['d18O_num','dD_num','dexcess_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].count()
+df_EGRIP_profiles_2019[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].std()
+df_EGRIP_profiles_2019[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].max()
+df_EGRIP_profiles_2019[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].min()
+df_EGRIP_profiles_2019[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_EGRIP_SCiso[df_EGRIP_SCiso.year == 2019].groupby(['depth'])[columnsToProcess].count()
 
 
 ## save the isotope data 
@@ -313,8 +320,22 @@ lbstd = df_EGRIP_profiles_2016.dD-df_EGRIP_profiles_2016.dD_std;
 ubstd = df_EGRIP_profiles_2016.dD+df_EGRIP_profiles_2016.dD_std;
 lbmin = df_EGRIP_profiles_2016.dD_min;
 ubmax = df_EGRIP_profiles_2016.dD_max;
-myDepthFunc(df_EGRIP_profiles_2016.dD,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dD_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 '+dDsym+' profile',
+myDepthFunc(df_EGRIP_profiles_2016.dD,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 '+dDsym+' profile',
             'dD','depth (cm)',[-400,-150],[-100,2],fileLoc,'prof_dD_EGRIP2016');
+
+lbstd = df_EGRIP_profiles_2016.dexcess-df_EGRIP_profiles_2016.dexcess_std;
+ubstd = df_EGRIP_profiles_2016.dexcess+df_EGRIP_profiles_2016.dexcess_std;
+lbmin = df_EGRIP_profiles_2016.dexcess_min;
+ubmax = df_EGRIP_profiles_2016.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2016.dexcess,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,2],fileLoc,'prof_dexcess_EGRIP2016');
+
+lbstd = df_EGRIP_profiles_2016.dxsln-df_EGRIP_profiles_2016.dxsln_std;
+ubstd = df_EGRIP_profiles_2016.dxsln+df_EGRIP_profiles_2016.dxsln_std;
+lbmin = df_EGRIP_profiles_2016.dxsln_min;
+ubmax = df_EGRIP_profiles_2016.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2016.dxsln,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,2],fileLoc,'prof_dxsln_EGRIP2016');
 
 
 # plot the profiles for 2017
@@ -329,8 +350,23 @@ lbstd = df_EGRIP_profiles_2017.dD-df_EGRIP_profiles_2017.dD_std;
 ubstd = df_EGRIP_profiles_2017.dD+df_EGRIP_profiles_2017.dD_std;
 lbmin = df_EGRIP_profiles_2017.dD_min;
 ubmax = df_EGRIP_profiles_2017.dD_max;
-myDepthFunc(df_EGRIP_profiles_2017.dD,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dD_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 '+dDsym+' profile',
+myDepthFunc(df_EGRIP_profiles_2017.dD,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 '+dDsym+' profile',
             'dD','depth (cm)',[-400,-150],[-100,2],fileLoc,'prof_dD_EGRIP2017');
+
+lbstd = df_EGRIP_profiles_2017.dexcess-df_EGRIP_profiles_2017.dexcess_std;
+ubstd = df_EGRIP_profiles_2017.dexcess+df_EGRIP_profiles_2017.dexcess_std;
+lbmin = df_EGRIP_profiles_2017.dexcess_min;
+ubmax = df_EGRIP_profiles_2017.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2017.dexcess,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,2],fileLoc,'prof_dexcess_EGRIP2017');
+
+lbstd = df_EGRIP_profiles_2017.dxsln-df_EGRIP_profiles_2017.dxsln_std;
+ubstd = df_EGRIP_profiles_2017.dxsln+df_EGRIP_profiles_2017.dxsln_std;
+lbmin = df_EGRIP_profiles_2017.dxsln_min;
+ubmax = df_EGRIP_profiles_2017.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2017.dxsln,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,2],fileLoc,'prof_dxsln_EGRIP2017');
+
 
 # plot the profiles for 2018
 lbstd = df_EGRIP_profiles_2018.d18O-df_EGRIP_profiles_2018.d18O_std;
@@ -344,8 +380,23 @@ lbstd = df_EGRIP_profiles_2018.dD-df_EGRIP_profiles_2018.dD_std;
 ubstd = df_EGRIP_profiles_2018.dD+df_EGRIP_profiles_2018.dD_std;
 lbmin = df_EGRIP_profiles_2018.dD_min;
 ubmax = df_EGRIP_profiles_2018.dD_max;
-myDepthFunc(df_EGRIP_profiles_2018.dD,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dD_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 '+dDsym+' profile',
+myDepthFunc(df_EGRIP_profiles_2018.dD,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 '+dDsym+' profile',
             'dD','depth (cm)',[-400,-150],[-100,2],fileLoc,'prof_dD_EGRIP2018');
+
+lbstd = df_EGRIP_profiles_2018.dexcess-df_EGRIP_profiles_2018.dexcess_std;
+ubstd = df_EGRIP_profiles_2018.dexcess+df_EGRIP_profiles_2018.dexcess_std;
+lbmin = df_EGRIP_profiles_2018.dexcess_min;
+ubmax = df_EGRIP_profiles_2018.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2018.dexcess,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,2],fileLoc,'prof_dexcess_EGRIP2018');
+
+lbstd = df_EGRIP_profiles_2018.dxsln-df_EGRIP_profiles_2018.dxsln_std;
+ubstd = df_EGRIP_profiles_2018.dxsln+df_EGRIP_profiles_2018.dxsln_std;
+lbmin = df_EGRIP_profiles_2018.dxsln_min;
+ubmax = df_EGRIP_profiles_2018.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2018.dxsln,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,2],fileLoc,'prof_dxsln_EGRIP2018');
+
 
 # plot the profiles for 2019
 lbstd = df_EGRIP_profiles_2019.d18O-df_EGRIP_profiles_2019.d18O_std;
@@ -359,9 +410,22 @@ lbstd = df_EGRIP_profiles_2019.dD-df_EGRIP_profiles_2019.dD_std;
 ubstd = df_EGRIP_profiles_2019.dD+df_EGRIP_profiles_2019.dD_std;
 lbmin = df_EGRIP_profiles_2019.dD_min;
 ubmax = df_EGRIP_profiles_2019.dD_max;
-myDepthFunc(df_EGRIP_profiles_2019.dD,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dD_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 '+dDsym+' profile',
+myDepthFunc(df_EGRIP_profiles_2019.dD,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 '+dDsym+' profile',
             'dD','depth (cm)',[-400,-150],[-100,2],fileLoc,'prof_dD_EGRIP2019');
 
+lbstd = df_EGRIP_profiles_2019.dexcess-df_EGRIP_profiles_2019.dexcess_std;
+ubstd = df_EGRIP_profiles_2019.dexcess+df_EGRIP_profiles_2019.dexcess_std;
+lbmin = df_EGRIP_profiles_2019.dexcess_min;
+ubmax = df_EGRIP_profiles_2019.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2019.dexcess,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,2],fileLoc,'prof_dexcess_EGRIP2019');
+
+lbstd = df_EGRIP_profiles_2019.dxsln-df_EGRIP_profiles_2019.dxsln_std;
+ubstd = df_EGRIP_profiles_2019.dxsln+df_EGRIP_profiles_2019.dxsln_std;
+lbmin = df_EGRIP_profiles_2019.dxsln_min;
+ubmax = df_EGRIP_profiles_2019.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2019.dxsln,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,2],fileLoc,'prof_dxsln_EGRIP2019');
 
 
 '''
