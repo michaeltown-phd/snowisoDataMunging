@@ -18,6 +18,7 @@ import os
 import datetime as dt
 from pandas_ods_reader import read_ods
 import pickle as pkl
+from scipy.signal import find_peaks
 
 
 #symbols
@@ -51,6 +52,15 @@ def sampNumDepthScale(d):
         print(sampNum)
         return np.nan
 
+# adjust the depth scale once the accumulation is taken into account
+def adjustDepthScale(d,dn):
+    
+    dAdj = np.asarray([]);
+    
+    for dep in d:
+        
+        dAdj = dn[np.abs(dn - d).argmin()]
+        
 
 # plot profile 
 
@@ -75,9 +85,15 @@ def plotProfile1(date,spn,spid,iso,bks,hrs,depth,title,xlab,ylab,xlim,ylim):
         plt.text(-380,-90,date.strftime('%Y%m%d'),rotation = 90)
         plt.locator_params(axis = 'x',nbins = 2);
 
+    elif xlab == 'dxsln':
+        clr = 'deepskyblue';
+        plt.text(5,-90,date.strftime('%Y%m%d'),rotation = 90)
+        plt.locator_params(axis = 'x',nbins = 2);
+        
+
     else:
         clr = 'lightblue';
-        plt.text(-20,-90,date.strftime('%Y%m%d'),rotation = 90)
+        plt.text(0,-90,date.strftime('%Y%m%d'),rotation = 90)
         plt.locator_params(axis = 'x',nbins = 2);
 
     plt.plot(iso,depth,color = clr,marker = '.',linestyle = '')    
@@ -124,6 +140,8 @@ def plotProfile2(spid,df,clr,title,xlab,ylab,xlim,ylim,y):
             iso = df[(df.date == d)].dD;
         elif xlab == 'd-excess':
             iso = df[(df.date == d)].dexcess;
+        elif xlab == 'dxsln':
+            iso = df[(df.date == d)].dxsln;
         else:
             print('I do not recognize that quantity.')
             return
@@ -174,14 +192,47 @@ def brkHrProcess(bh):
     
     return breakHoarList
      
-
-
+# apply break values
 def breaksApply(sn, d, i, bv):
     if sn==ind and d==b:
         return 1
     else:
         return 0
     
+# plot profiles 
+def myDepthFunc(x,d,num,clr,lbstd,ubstd,lbmin,ubmax,title,xlab,ylab,xlim,ylim,fileloc,filename):
+
+    fig1 = plt.figure(figsize=(5,5))
+    plt.subplot(1,5,(1,4))
+    plt.plot(x,d,clr,linewidth = 3)
+    plt.plot(lbstd,d,'k--',alpha = 0.5)
+    plt.plot(ubstd,d,'k--',alpha = 0.5)
+    plt.plot(lbmin,d,'k-.',alpha = 0.2)
+    plt.plot(ubmax,d,'k-.',alpha = 0.2)
+    plt.grid();
+    plt.title(title)
+    
+    if xlab == 'd18O':
+        plt.xlabel(d18Osym+ ' ( '+pptsym+')')
+    elif xlab == 'dD':
+        plt.xlabel(dDsym+ ' ( '+pptsym+')')
+    else:
+        plt.xlabel(xlab)
+        
+    plt.ylabel(ylab)
+    plt.xlim(xlim)
+    plt.ylim(ylim)
+    
+    plt.subplot(1,5,5)    
+#    plt.barh(d, num, 2, color = 'black',alpha = 0.5)
+    plt.plot(num,d,'k--',linewidth = 3, alpha = 0.4)
+    plt.title('count profile')
+    plt.xlabel('count')
+    plt.ylim(ylim)
+    plt.grid()    
+    
+    os.chdir(fileloc)
+    fig1.savefig(filename+'.jpg')
 
 
 fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/';
@@ -297,12 +348,15 @@ df_iso = df_iso.merge(df_temp,left_on = 'sampleNames',right_index= True,how = 'l
 oldNames = ['accumulation_x'];
 newNames = ['accumulation'];
 df_iso.rename(columns = dict(zip(oldNames,newNames)),inplace=True);
-df_iso = df_iso.drop(columns = 'accumulation_y')
 
 df_iso.loc[df_iso.accumulation.isnull(),'accumulation'] = 0
 df_iso['depthAcc'] = df_iso.depth-df_iso.accumulation
 
-    
+# make this depth scale regular
+depthNew = np.append(np.arange(-15,0,1),df_iso.depth.unique())
+
+df_iso['depthAcc_reg'] = df_iso['depthAcc'].apply(lambda x: depthNew[np.abs(depthNew - x).argmin()])
+
     
 
 # plot all data in one year at one location as separate subplots 
@@ -327,7 +381,8 @@ for y in yearUnique:
             
             iso18O = dfTemp[(dfTemp.date == d)].d18O;
 #            depth = dfTemp[(dfTemp.date == d)].depth
-            depth = dfTemp[(dfTemp.date == d)].depthAcc
+#            depth = dfTemp[(dfTemp.date == d)].depthAcc
+            depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
             brksTemp = dfTemp[(dfTemp.date == d)].breaks
             hrsTemp = dfTemp[(dfTemp.date == d)].hoar
             
@@ -339,7 +394,7 @@ for y in yearUnique:
             plotProfile1(d,numDates,i,iso18O,brksTemp,hrsTemp,-1*depth,titleStr,'d18O','depth (cm)',[-50,-20],[-100,15])
             i = i + 1;
         plt.show()
-        figO18.savefig('./'+str(y)+'snowCoreIndividual_d18O'+str(y)+'_pos_'+str(c)+'.jpg') 
+        figO18.savefig('./'+str(y)+'/snowCoreIndividual_d18O'+str(y)+'_pos_'+str(c)+'.jpg') 
         
         # could do this without two loops if I could use figure handles better
 
@@ -349,7 +404,8 @@ for y in yearUnique:
             
             isoD = dfTemp[(dfTemp.date == d)].dD;
 #            depth = dfTemp[(dfTemp.date == d)].depth
-            depth = dfTemp[(dfTemp.date == d)].depthAcc
+#            depth = dfTemp[(dfTemp.date == d)].depthAcc
+            depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
             brksTemp = dfTemp[(dfTemp.date == d)].breaks
             hrsTemp = dfTemp[(dfTemp.date == d)].hoar
 
@@ -365,11 +421,10 @@ for y in yearUnique:
         figD = plt.figure()        
         i = 1;
         for d in dateUnique:
-            iso18O = dfTemp[(dfTemp.date == d)].d18O            
-            isoD = dfTemp[(dfTemp.date == d)].dD;
-            dexcess = isoD-8*iso18O;
+            dexcess = dfTemp[(dfTemp.date == d)].dexcess;
 #            depth = dfTemp[(dfTemp.date == d)].depth
-            depth = dfTemp[(dfTemp.date == d)].depthAcc
+#            depth = dfTemp[(dfTemp.date == d)].depthAcc
+            depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
             brksTemp = dfTemp[(dfTemp.date == d)].breaks
             hrsTemp = dfTemp[(dfTemp.date == d)].hoar
 
@@ -381,8 +436,27 @@ for y in yearUnique:
             plotProfile1(d,numDates,i,dexcess,brksTemp,hrsTemp,-1*depth,titleStr,'d-excess','depth (cm)',[-5,20],[-100,15])
             i = i + 1;
         plt.show()
-        figD.savefig('./'+str(y)+'snowCoreIndividual_dexcess_'+str(y)+'_pos_'+str(c)+'.jpg') 
+        figD.savefig('./'+str(y)+'/snowCoreIndividual_dexcess_'+str(y)+'_pos_'+str(c)+'.jpg') 
         
+        figD = plt.figure()        
+        i = 1;
+        for d in dateUnique:
+            dxsln = dfTemp[(dfTemp.date == d)].dxsln
+#            depth = dfTemp[(dfTemp.date == d)].depth
+#            depth = dfTemp[(dfTemp.date == d)].depthAcc
+            depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
+            brksTemp = dfTemp[(dfTemp.date == d)].breaks
+            hrsTemp = dfTemp[(dfTemp.date == d)].hoar
+
+
+            if i == 3:
+                titleStr = 'individual dxsln: pos ' + str(c);
+            else:
+                titleStr = '';            
+            plotProfile1(d,numDates,i,dxsln,brksTemp,hrsTemp,-1*depth,titleStr,'dxsln','depth (cm)',[0,35],[-100,15])
+            i = i + 1;
+        plt.show()
+        figD.savefig('./'+str(y)+'/snowCoreIndividual_dxsln_'+str(y)+'_pos_'+str(c)+'.jpg') 
                
 # plot the 2016 snowcore data
 
@@ -395,37 +469,223 @@ for c in coreID[0:2]:
     titleStr = 'individual d18O: pos ' + str(c);
     figO18 = plt.figure()        
     plotProfile2(c,dfTemp,'black',titleStr,'d18O','depth (cm)',[-50,-20],[-100,10],y)
-    figO18.savefig('./'+str(y)+'snowCoreIndividual_d18O_'+str(y)+'_pos_'+str(c)+'.jpg')    
+    figO18.savefig('./'+str(y)+'/snowCoreIndividual_d18O_'+str(y)+'_pos_'+str(c)+'.jpg')    
 
     titleStr = 'individual dD: pos ' + str(c);    
     figdD = plt.figure()        
     plotProfile2(c,dfTemp,'red',titleStr,'dD','depth (cm)',[-400,-200],[-100,10],y)
-    figdD.savefig('./'+str(y)+'snowCoreIndividual_dD_'+str(y)+'_pos_'+str(c)+'.jpg')    
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dD_'+str(y)+'_pos_'+str(c)+'.jpg')    
 
     titleStr = 'individual dexcess: pos ' + str(c);
     figdD = plt.figure()        
-    plotProfile2(c,dfTemp,'darkblue',titleStr,'d-excess','depth (cm)',[-8,20],[-100,10],y)
-    figdD.savefig('./'+str(y)+'snowCoreIndividual_dexcess_'+str(y)+'_pos_'+str(c)+'.jpg')    
+    plotProfile2(c,dfTemp,'lightblue',titleStr,'d-excess','depth (cm)',[-5,20],[-100,10],y)
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dexcess_'+str(y)+'_pos_'+str(c)+'.jpg')    
+
+    titleStr = 'individual dxsln: pos ' + str(c);
+    figdD = plt.figure()        
+    plotProfile2(c,dfTemp,'deepskyblue',titleStr,'dxsln','depth (cm)',[0,35],[-100,10],y)
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dxsln_'+str(y)+'_pos_'+str(c)+'.jpg')    
+
 
     titleStr = 'individual d18O: pos ' + str(c);
     figO18 = plt.figure()        
     plotProfile2(c,dfTemp,'black',titleStr,'d18O','depth (cm)',[-50,-20],[-40,10],y)
-    figO18.savefig('./'+str(y)+'snowCoreIndividual_d18O_'+str(y)+'_pos_'+str(c)+'(2).jpg')    
+    figO18.savefig('./'+str(y)+'/snowCoreIndividual_d18O_z'+str(y)+'_pos_'+str(c)+'(2).jpg')    
     
     titleStr = 'individual dD: pos ' + str(c);
     figdD = plt.figure()        
     plotProfile2(c,dfTemp,'red',titleStr,'dD','depth (cm)',[-400,-200],[-40,10],y)
-    figdD.savefig('./'+str(y)+'snowCoreIndividual_dD_'+str(y)+'_pos_'+str(c)+'(2).jpg')    
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dD_z'+str(y)+'_pos_'+str(c)+'(2).jpg')    
 
     titleStr = 'individual dexcess: pos ' + str(c);
     figdD = plt.figure()        
-    plotProfile2(c,dfTemp,'darkblue',titleStr,'d-excess','depth (cm)',[-8,20],[-40,10],y)
-    figdD.savefig('./'+str(y)+'snowCoreIndividual_dexcess_'+str(y)+'_pos_'+str(c)+'(2).jpg')    
+    plotProfile2(c,dfTemp,'lightblue',titleStr,'d-excess','depth (cm)',[-5,20],[-40,10],y)
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dexcess_z'+str(y)+'_pos_'+str(c)+'(2).jpg')    
+
+    titleStr = 'individual dxsln: pos ' + str(c);
+    figdD = plt.figure()        
+    plotProfile2(c,dfTemp,'deepskyblue',titleStr,'dxsln','depth (cm)',[0,35],[-40,10],y)
+    figdD.savefig('./'+str(y)+'/snowCoreIndividual_dxsln_z'+str(y)+'_pos_'+str(c)+'(2).jpg')    
+
+
+# plot the mean annual profiles after the accumulation correction has been added
+
+# stats on grouped data.
+columnsToProcess = ['d18O','dD','dexcess','dxsln']
+
+# round everything onto a regular depth axis using depthAcc.
+df_EGRIP_profiles_2016 = df_iso[df_iso.year == 2016].groupby(['depthAcc_reg'])[columnsToProcess].mean()
+df_EGRIP_profiles_2016[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_iso[df_iso.year == 2016].groupby(['depthAcc_reg'])[columnsToProcess].std()
+df_EGRIP_profiles_2016[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_iso[df_iso.year == 2016].groupby(['depthAcc_reg'])[columnsToProcess].max()
+df_EGRIP_profiles_2016[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_iso[df_iso.year == 2016].groupby(['depthAcc_reg'])[columnsToProcess].min()
+df_EGRIP_profiles_2016[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_iso[df_iso.year == 2016].groupby(['depthAcc_reg'])[columnsToProcess].count()
+
+df_EGRIP_profiles_2017 = df_iso[df_iso.year == 2017].groupby(['depthAcc_reg'])[columnsToProcess].mean()
+df_EGRIP_profiles_2017[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_iso[df_iso.year == 2017].groupby(['depthAcc_reg'])[columnsToProcess].std()
+df_EGRIP_profiles_2017[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_iso[df_iso.year == 2017].groupby(['depthAcc_reg'])[columnsToProcess].max()
+df_EGRIP_profiles_2017[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_iso[df_iso.year == 2017].groupby(['depthAcc_reg'])[columnsToProcess].min()
+df_EGRIP_profiles_2017[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_iso[df_iso.year == 2017].groupby(['depthAcc_reg'])[columnsToProcess].count()
+
+df_EGRIP_profiles_2018 = df_iso[df_iso.year == 2018].groupby(['depthAcc_reg'])[columnsToProcess].mean()
+df_EGRIP_profiles_2018[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_iso[df_iso.year == 2018].groupby(['depthAcc_reg'])[columnsToProcess].std()
+df_EGRIP_profiles_2018[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_iso[df_iso.year == 2018].groupby(['depthAcc_reg'])[columnsToProcess].max()
+df_EGRIP_profiles_2018[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_iso[df_iso.year == 2018].groupby(['depthAcc_reg'])[columnsToProcess].min()
+df_EGRIP_profiles_2018[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_iso[df_iso.year == 2018].groupby(['depthAcc_reg'])[columnsToProcess].count()
+
+
+df_EGRIP_profiles_2019 = df_iso[df_iso.year == 2019].groupby(['depthAcc_reg'])[columnsToProcess].mean()
+df_EGRIP_profiles_2019[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_iso[df_iso.year == 2019].groupby(['depthAcc_reg'])[columnsToProcess].std()
+df_EGRIP_profiles_2019[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_iso[df_iso.year == 2019].groupby(['depthAcc_reg'])[columnsToProcess].max()
+df_EGRIP_profiles_2019[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_iso[df_iso.year == 2019].groupby(['depthAcc_reg'])[columnsToProcess].min()
+df_EGRIP_profiles_2019[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_iso[df_iso.year == 2019].groupby(['depthAcc_reg'])[columnsToProcess].count()
+
+# save the mean annual profiles, not quite sure what to do with the break and hoar information here.
+os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/')
+
+dataFileName = 'eastGRIP_SCmeanProfileData_2016.pkl';
+outfile = open(dataFileName,'wb');
+pkl.dump(df_EGRIP_profiles_2016,outfile);
+outfile.close();
+
+dataFileName = 'eastGRIP_SCmeanProfileData_2017.pkl';
+outfile = open(dataFileName,'wb');
+pkl.dump(df_EGRIP_profiles_2017,outfile);
+outfile.close();
+
+dataFileName = 'eastGRIP_SCmeanProfileData_2018.pkl';
+outfile = open(dataFileName,'wb');
+pkl.dump(df_EGRIP_profiles_2018,outfile);
+outfile.close();
+
+dataFileName = 'eastGRIP_SCmeanProfileData_2019.pkl';
+outfile = open(dataFileName,'wb');
+pkl.dump(df_EGRIP_profiles_2019,outfile);
+outfile.close();
+
+fileLoc = '/home/michaeltown/work/projects/snowiso/figures/EastGRIP/'
+
+lbstd = df_EGRIP_profiles_2016.d18O-df_EGRIP_profiles_2016.d18O_std;
+ubstd = df_EGRIP_profiles_2016.d18O+df_EGRIP_profiles_2016.d18O_std;
+lbmin = df_EGRIP_profiles_2016.d18O_min;
+ubmax = df_EGRIP_profiles_2016.d18O_max;
+myDepthFunc(df_EGRIP_profiles_2016.d18O,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.d18O_num,'black',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 '+d18Osym+' profile',
+            'd18O','depth (cm)',[-50,-20],[-100,15],fileLoc,'prof_d18O_EGRIP2016');
+
+lbstd = df_EGRIP_profiles_2016.dD-df_EGRIP_profiles_2016.dD_std;
+ubstd = df_EGRIP_profiles_2016.dD+df_EGRIP_profiles_2016.dD_std;
+lbmin = df_EGRIP_profiles_2016.dD_min;
+ubmax = df_EGRIP_profiles_2016.dD_max;
+myDepthFunc(df_EGRIP_profiles_2016.dD,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 '+dDsym+' profile',
+            'dD','depth (cm)',[-400,-150],[-100,15],fileLoc,'prof_dD_EGRIP2016');
+
+lbstd = df_EGRIP_profiles_2016.dexcess-df_EGRIP_profiles_2016.dexcess_std;
+ubstd = df_EGRIP_profiles_2016.dexcess+df_EGRIP_profiles_2016.dexcess_std;
+lbmin = df_EGRIP_profiles_2016.dexcess_min;
+ubmax = df_EGRIP_profiles_2016.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2016.dexcess,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,15],fileLoc,'prof_dexcess_EGRIP2016');
+
+lbstd = df_EGRIP_profiles_2016.dxsln-df_EGRIP_profiles_2016.dxsln_std;
+ubstd = df_EGRIP_profiles_2016.dxsln+df_EGRIP_profiles_2016.dxsln_std;
+lbmin = df_EGRIP_profiles_2016.dxsln_min;
+ubmax = df_EGRIP_profiles_2016.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2016.dxsln,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,15],fileLoc,'prof_dxsln_EGRIP2016');
+
+
+# plot the profiles for 2017
+lbstd = df_EGRIP_profiles_2017.d18O-df_EGRIP_profiles_2017.d18O_std;
+ubstd = df_EGRIP_profiles_2017.d18O+df_EGRIP_profiles_2017.d18O_std;
+lbmin = df_EGRIP_profiles_2017.d18O_min;
+ubmax = df_EGRIP_profiles_2017.d18O_max;
+myDepthFunc(df_EGRIP_profiles_2017.d18O,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.d18O_num,'black',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 '+d18Osym+' profile',
+            'd18O','depth (cm)',[-50,-20],[-100,15],fileLoc,'prof_d18O_EGRIP2017');
+
+lbstd = df_EGRIP_profiles_2017.dD-df_EGRIP_profiles_2017.dD_std;
+ubstd = df_EGRIP_profiles_2017.dD+df_EGRIP_profiles_2017.dD_std;
+lbmin = df_EGRIP_profiles_2017.dD_min;
+ubmax = df_EGRIP_profiles_2017.dD_max;
+myDepthFunc(df_EGRIP_profiles_2017.dD,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 '+dDsym+' profile',
+            'dD','depth (cm)',[-400,-150],[-100,15],fileLoc,'prof_dD_EGRIP2017');
+
+lbstd = df_EGRIP_profiles_2017.dexcess-df_EGRIP_profiles_2017.dexcess_std;
+ubstd = df_EGRIP_profiles_2017.dexcess+df_EGRIP_profiles_2017.dexcess_std;
+lbmin = df_EGRIP_profiles_2017.dexcess_min;
+ubmax = df_EGRIP_profiles_2017.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2017.dexcess,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,15],fileLoc,'prof_dexcess_EGRIP2017');
+
+lbstd = df_EGRIP_profiles_2017.dxsln-df_EGRIP_profiles_2017.dxsln_std;
+ubstd = df_EGRIP_profiles_2017.dxsln+df_EGRIP_profiles_2017.dxsln_std;
+lbmin = df_EGRIP_profiles_2017.dxsln_min;
+ubmax = df_EGRIP_profiles_2017.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2017.dxsln,-df_EGRIP_profiles_2017.index,df_EGRIP_profiles_2017.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2017 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,15],fileLoc,'prof_dxsln_EGRIP2017');
+
+
+# plot the profiles for 2018
+lbstd = df_EGRIP_profiles_2018.d18O-df_EGRIP_profiles_2018.d18O_std;
+ubstd = df_EGRIP_profiles_2018.d18O+df_EGRIP_profiles_2018.d18O_std;
+lbmin = df_EGRIP_profiles_2018.d18O_min;
+ubmax = df_EGRIP_profiles_2018.d18O_max;
+myDepthFunc(df_EGRIP_profiles_2018.d18O,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.d18O_num,'black',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 '+d18Osym+' profile',
+            'd18O','depth (cm)',[-50,-20],[-100,15],fileLoc,'prof_d18O_EGRIP2018');
+
+lbstd = df_EGRIP_profiles_2018.dD-df_EGRIP_profiles_2018.dD_std;
+ubstd = df_EGRIP_profiles_2018.dD+df_EGRIP_profiles_2018.dD_std;
+lbmin = df_EGRIP_profiles_2018.dD_min;
+ubmax = df_EGRIP_profiles_2018.dD_max;
+myDepthFunc(df_EGRIP_profiles_2018.dD,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 '+dDsym+' profile',
+            'dD','depth (cm)',[-400,-150],[-100,15],fileLoc,'prof_dD_EGRIP2018');
+
+lbstd = df_EGRIP_profiles_2018.dexcess-df_EGRIP_profiles_2018.dexcess_std;
+ubstd = df_EGRIP_profiles_2018.dexcess+df_EGRIP_profiles_2018.dexcess_std;
+lbmin = df_EGRIP_profiles_2018.dexcess_min;
+ubmax = df_EGRIP_profiles_2018.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2018.dexcess,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,15],fileLoc,'prof_dexcess_EGRIP2018');
+
+lbstd = df_EGRIP_profiles_2018.dxsln-df_EGRIP_profiles_2018.dxsln_std;
+ubstd = df_EGRIP_profiles_2018.dxsln+df_EGRIP_profiles_2018.dxsln_std;
+lbmin = df_EGRIP_profiles_2018.dxsln_min;
+ubmax = df_EGRIP_profiles_2018.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2018.dxsln,-df_EGRIP_profiles_2018.index,df_EGRIP_profiles_2018.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2018 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,15],fileLoc,'prof_dxsln_EGRIP2018');
+
+
+# plot the profiles for 2019
+lbstd = df_EGRIP_profiles_2019.d18O-df_EGRIP_profiles_2019.d18O_std;
+ubstd = df_EGRIP_profiles_2019.d18O+df_EGRIP_profiles_2019.d18O_std;
+lbmin = df_EGRIP_profiles_2019.d18O_min;
+ubmax = df_EGRIP_profiles_2019.d18O_max;
+myDepthFunc(df_EGRIP_profiles_2019.d18O,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.d18O_num,'black',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 '+d18Osym+' profile',
+            'd18O','depth (cm)',[-50,-20],[-100,15],fileLoc,'prof_d18O_EGRIP2019');
+
+lbstd = df_EGRIP_profiles_2019.dD-df_EGRIP_profiles_2019.dD_std;
+ubstd = df_EGRIP_profiles_2019.dD+df_EGRIP_profiles_2019.dD_std;
+lbmin = df_EGRIP_profiles_2019.dD_min;
+ubmax = df_EGRIP_profiles_2019.dD_max;
+myDepthFunc(df_EGRIP_profiles_2019.dD,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dD_num,'blue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 '+dDsym+' profile',
+            'dD','depth (cm)',[-400,-150],[-100,15],fileLoc,'prof_dD_EGRIP2019');
+
+lbstd = df_EGRIP_profiles_2019.dexcess-df_EGRIP_profiles_2019.dexcess_std;
+ubstd = df_EGRIP_profiles_2019.dexcess+df_EGRIP_profiles_2019.dexcess_std;
+lbmin = df_EGRIP_profiles_2019.dexcess_min;
+ubmax = df_EGRIP_profiles_2019.dexcess_max;
+myDepthFunc(df_EGRIP_profiles_2019.dexcess,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dexcess_num,'lightblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 dexcess profile',
+            'dexcess','depth (cm)',[-5,20],[-100,15],fileLoc,'prof_dexcess_EGRIP2019');
+
+lbstd = df_EGRIP_profiles_2019.dxsln-df_EGRIP_profiles_2019.dxsln_std;
+ubstd = df_EGRIP_profiles_2019.dxsln+df_EGRIP_profiles_2019.dxsln_std;
+lbmin = df_EGRIP_profiles_2019.dxsln_min;
+ubmax = df_EGRIP_profiles_2019.dxsln_max;
+myDepthFunc(df_EGRIP_profiles_2019.dxsln,-df_EGRIP_profiles_2019.index,df_EGRIP_profiles_2019.dxsln_num,'deepskyblue',lbstd,ubstd,lbmin,ubmax,'EGRIP 2019 dxsln profile',
+            'dxsln','depth (cm)',[0,35],[-100,15],fileLoc,'prof_dxsln_EGRIP2019');
 
 
 ## save the data file with the breaks, hoar, and accumulation info
 os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/')
-dataFileName = 'eastGRIP_SCisoData_2016-2019.pkl';
+dataFileName = 'eastGRIP_SCisoData_2016-2019_acc.pkl';
 outfile = open(dataFileName,'wb');
 pkl.dump(df_iso,outfile);
 outfile.close();

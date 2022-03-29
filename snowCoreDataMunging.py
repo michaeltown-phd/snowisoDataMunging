@@ -28,6 +28,9 @@ import os
 import datetime as dt
 from pandas_ods_reader import read_ods
 import pickle as pkl
+from scipy.signal import find_peaks
+ 
+
 
 #symbols
 d18Osym = '$\delta^{18}$O' 

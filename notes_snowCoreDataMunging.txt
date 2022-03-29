@@ -640,8 +640,15 @@ These don't look duplicated to me, and the accumulation values are not zero here
 
 qc on last two profiles in 2017. missing field notes on these cores
 
---> dxs vs d18O 
-some inconclusive scatter plotting here, but possibly some important things
-will summarize in research notebook
+--> 25 March 2022
+added new dxs computation to snowcoredatamunging.py
+
+--> 27 March 2022
+Not quite sure what do to with the break and hoar information when I compute the mean annual profiles
+
+--> 29 March 2022, find peaks testing
+found peaks. using width = 2, distance = 8. These params are set to find the seasonally signficant peaks and work for the individual cores (mostly), and are pretty bomb proof for the annual mean cores.
+
+Next steps is to apply these params to each data frame and then save the peaks identifier to another binary column.
 
 
