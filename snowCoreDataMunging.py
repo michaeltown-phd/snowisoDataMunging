@@ -195,7 +195,7 @@ def sampleNameClean(s):
 
 ## starting with reading and parsing the d18O and dD into a data frame
 
-fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/'
+fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/isotopes/'
 
 # could not read the xlsx file, but better to keep the xlsx file unmodified anyway.
 fileNameAWI = 'SP_2016To2019_AWI.ods'
@@ -280,7 +280,7 @@ df_EGRIP_profiles_2019[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_EGR
 
 
 ## save the isotope data 
-os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/')
+os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/isotopes/')
 dataFileName = 'eastGRIP_SCisoData_2016-2019.pkl';
 outfile = open(dataFileName,'wb');
 pkl.dump(df_EGRIP_SCiso,outfile);

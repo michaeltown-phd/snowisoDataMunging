@@ -14,7 +14,7 @@ import figureMagic as fm
 import matplotlib.pyplot as plt
 import numpy as np
 
-fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/';
+fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/isotopes/';
 figureLoc  ='/home/michaeltown/work/projects/snowiso/figures/EastGRIP/'
 #fileNameIso = 'eastGRIP_SCmeanProfileData_2019.pkl'
 fileNameIso = 'eastGRIP_SCmeanProfileData_2018.pkl'
@@ -103,7 +103,10 @@ fileNameIso = 'eastGRIP_SCisoData_2016-2019_acc.pkl'
 df_iso = pd.read_pickle(fileLoc+fileNameIso);
 
 # peak params
-dist = 8; wid = 2;
+dist = 6; 
+wid = None; 
+hei = 1;
+prom= None;
 
 coreID = np.arange(1,6);
 yearUnique = df_iso.year.unique();
@@ -125,8 +128,12 @@ for y in np.arange(2017,2020,1):
             depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
             brksTemp = dfTemp[(dfTemp.date == d)].breaks
             hrsTemp = dfTemp[(dfTemp.date == d)].hoar
-            peaks, _ = find_peaks(iso18O,distance = dist,width = wid)
-            troughs, _ = find_peaks(-iso18O,distance = dist,width = wid)
+            
+            dfT = pd.concat([iso18O,depth,brksTemp,hrsTemp])
+            
+            peaks, _ = find_peaks(iso18O, distance = dist, height = hei, width = wid, prominence = prom)
+            troughs, _ = find_peaks(-iso18O, distance = dist, height = hei, width = wid, prominence = prom)
+
             maxMin = np.append(peaks,troughs)            
             
             if i == 3:
@@ -134,6 +141,8 @@ for y in np.arange(2017,2020,1):
             else:
                 titleStr = '';            
             fm.plotProfile1(d,numDates,i,iso18O,brksTemp,hrsTemp,-1*depth,titleStr,'d18O','depth (cm)',[-50,-20],[-100,15])
-            plt.plot(iso18O[maxMin],-depth[maxMin],'x',color = 'orange')
+            plt.plot(iso18O[peaks],-depth[peaks],'x',color = 'orange')
+            plt.plot(iso18O[troughs],-depth[troughs],'x',color = 'blue')
+
             i = i + 1;
         plt.show()

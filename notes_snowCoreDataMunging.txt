@@ -651,4 +651,32 @@ found peaks. using width = 2, distance = 8. These params are set to find the sea
 
 Next steps is to apply these params to each data frame and then save the peaks identifier to another binary column.
 
+-->30 March 2022
 
+included the peaks as a mask column in the primary isotope data frame
+
+--> 31March 2022
+
+working on eliminating the spurious peak identification in the individual record.
+one idea here is to mark seasonal peaks, as well as important transitions...
+
+8 April 2022
+cleaning up the data with errant points and doubles rectified...
+all these depths are after correction for accumulation.
+pos1 20170701 d18O/dD, doubles at 30 cm, 60cm 
+pos3 20170726  d18O/dD at 50 cm -- removed
+pos1 20180707 d18o/dD doubles at 30-36 cm, 65
+pos1 20180721 d18o/dD doubles at 30-36 cm, 65, 90
+pos2 20180608 d18O/dD top number? - removed
+pos3 20180512 d18o/dD top numbers 0-4 cm? - ok
+pos3 20180721 dD doubles at 0 cm? 
+pos5 20180622/20180707 d18O/dD doubles at 18, 36 cm, 58 cm, 78 cm, 90 cm
+pos5 20180512 top 10 cm all the same? - ok
+pos4 20170526  check accumulation - ok
+pos4 20180806 0-5 cm all the same? - ok
+
+doubles are being induced by the accumulation code, and then rounding to the new height. See if this can be mitigated.
+
+--> 15 April 2022
+
+There is a problem here with separating the data by 'season' by hand. The mean values that pop out will be very sensitive to the process, especially in the cases of sharp transitions. I'm worried the results will be so much junk compared to how much effort it will be to separate the values by hand!

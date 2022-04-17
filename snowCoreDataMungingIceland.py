@@ -28,7 +28,7 @@ def sampleNameRefine(s):
     return newS
         
 
-fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/'
+fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/isotopes/'
 figureLoc = '/home/michaeltown/work/projects/snowiso/figures/EastGRIP/'
 
 fileNames = ['SP_2017_Iceland.ods','SP_2018_Iceland.ods','SP_2019_Iceland.ods']
@@ -121,7 +121,7 @@ df_EGRIP_iceland['Sample'] = df_EGRIP_iceland['Sample'].apply(sampleNameRefine)
 
 
 # save the data
-os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/')
+os.chdir(fileLoc)
 dataFileName = 'eastGRIP_SCisoData_2017-2019_iceland.pkl';
 outfile = open(dataFileName,'wb');
 pkl.dump(df_EGRIP_iceland,outfile);
