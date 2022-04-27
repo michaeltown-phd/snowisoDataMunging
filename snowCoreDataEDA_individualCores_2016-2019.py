@@ -9,6 +9,14 @@ Created on Thu Feb 17 14:33:58 2022
 '''
 Here I do initial EDA on each year of the snow cores, including the break points observed in each core.
 
+Everything is plotted as a function of position and year.
+
+Some data frames are produced and saved as the accumulation and breaks/hoar data are incorporated into the 
+data frames.
+
+Each iteration of the data frames are saved with a new suffix in case we have to work 
+backwards for some reason.
+
 '''
 
 import pandas as pd
@@ -257,6 +265,12 @@ for y in yearUnique:
             depth = dfTemp[(dfTemp.date == d)].depthAcc_reg
             brksTemp = dfTemp[(dfTemp.date == d)].breaks
             hrsTemp = dfTemp[(dfTemp.date == d)].hoar
+            
+            iso18O.sort_index(ascending = True, inplace=True)
+            depth.sort_index(ascending = True, inplace=True)
+            brksTemp.sort_index(ascending = True, inplace=True)
+            hrsTemp.sort_index(ascending = True, inplace=True)
+            
             peaks, _ = find_peaks(iso18O,distance = dist,width = wid)
             troughs, _ = find_peaks(-iso18O,distance = dist,width = wid)
             maxMin = np.append(peaks,troughs)            
@@ -455,7 +469,7 @@ df_EGRIP_profiles_2019.loc[df_EGRIP_profiles_2019.iloc[troughs].index,'peaksMin'
 
 
 # save the mean annual profiles, not quite sure what to do with the break and hoar information here.
-os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/')
+os.chdir('/home/michaeltown/work/projects/snowiso/data/EastGRIP/isotopes/')
 
 dataFileName = 'eastGRIP_SCmeanProfileData_2016.pkl';
 outfile = open(dataFileName,'wb');
@@ -657,34 +671,6 @@ outfile = open(dataFileName,'wb');
 pkl.dump(df_iso,outfile);
 outfile.close();
 
-
-# plot average of each day (1-5 positions) as separate subplots, with std, num
-# this groupby gives a multiindex data frame.
-
-columnsToProcess = ['d18O','dD','dexcess','dxsln']
-
-df_iso_pos = df_iso.groupby(['depthAcc_reg','date'])[columnsToProcess].mean()
-df_iso_pos[['d18O_std','dD_std','dexcess_std','dxsln_std']] = df_iso.groupby(['depthAcc_reg','date'])[columnsToProcess].std()
-df_iso_pos[['d18O_max','dD_max','dexcess_max','dxsln_max']] = df_iso.groupby(['depthAcc_reg','date'])[columnsToProcess].max()
-df_iso_pos[['d18O_min','dD_min','dexcess_min','dxsln_min']] = df_iso.groupby(['depthAcc_reg','date'])[columnsToProcess].min()
-df_iso_pos[['d18O_num','dD_num','dexcess_num','dxsln_num']] = df_iso.groupby(['depthAcc_reg','date'])[columnsToProcess].count()
-
-df_iso_pos = df_iso_pos.reset_index(level = 0);         # should reset the index to date and leave depthAcc_reg as a column
-df_iso_pos['year'] = df_iso_pos.index.year
-
-fileLoc = None;
-
-
-for y in yearUnique:
-
-
-    for d 
-        lbstd = df_iso_pos.d18O-df_EGRIP_profiles_2016.d18O_std;
-        ubstd = df_EGRIP_profiles_2016.d18O+df_EGRIP_profiles_2016.d18O_std;
-        lbmin = df_EGRIP_profiles_2016.d18O_min;
-        ubmax = df_EGRIP_profiles_2016.d18O_max;
-        myDepthFunc(df_EGRIP_profiles_2016.d18O,-df_EGRIP_profiles_2016.index,df_EGRIP_profiles_2016.d18O_num,'black',lbstd,ubstd,lbmin,ubmax,'EGRIP 2016 '+d18Osym+' profile',
-                    'd18O','depth (cm)',[-50,-20],[-100,2],fileLoc,'prof_d18O_EGRIP2016');
 
 
 # plot all data in one year at one location as a contour plot with x-axis as distance, especially the 

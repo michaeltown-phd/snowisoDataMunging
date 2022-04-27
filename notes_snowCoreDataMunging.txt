@@ -680,3 +680,45 @@ doubles are being induced by the accumulation code, and then rounding to the new
 --> 15 April 2022
 
 There is a problem here with separating the data by 'season' by hand. The mean values that pop out will be very sensitive to the process, especially in the cases of sharp transitions. I'm worried the results will be so much junk compared to how much effort it will be to separate the values by hand!
+
+--> 20 April 2022
+
+adding and subtracting peaks from the 2019 data set to facilitate 'dating' and statistics on the snowcores.
+
+For reference: the regular grid of the accumulation
+array([-12. , -11. , -10. ,  -9. ,  -8. ,  -7. ,  -6. ,  -5. ,  -4. ,
+        -3. ,  -2. ,  -1. ,   0.5,   1.6,   2.7,   3.8,   4.9,   6. ,
+         7.1,   8.2,   9.3,  10.4,  11.5,  13.7,  15.9,  18.1,  20.3,
+        22.5,  24.7,  26.9,  29.1,  31.3,  33.5,  35.7,  37.9,  40.1,
+        42.3,  44.5,  46.7,  48.9,  51.1,  53.3,  55.5,  57.7,  59.9,
+        62.1,  64.3,  66.5,  68.7,  70.9,  73.1,  75.3,  77.5,  79.7,
+        81.9,  84.1,  86.3,  88.5,  90.7,  92.9,  95.1,  97.3,  99.5,
+       101.7])
+
+
+Added
+sampleName, depth, peakType, Reason
+SP1_20190611, 18.1, min, kink
+SP1_20190626, 29.1, min, kink
+SP1_20190715, 31.3, min, kink
+SP1_20190724, 24.7, min, kink
+
+
+
+Subtracted		
+sampleName, depth, peakType, Reason
+SP1_20190529, 90.7, min, does not exist in other profiles
+SP1_20190626, 6.0, max, does not exist in other profiles
+
+--> 27 April 2022
+
+So, in the process of trying to find the evolution of each profile, I have separated the profiles into 'blocks' that are demarked by peaks and valleys found by find peaks. 
+
+These are correlated currently by hand to air temperature measurements that likely happened coindidentally. 
+
+the relavant code is:
+snowCoreListPeakValuesAndAdjust.py
+
+This code is written to include a fixed number of blocks for each season. I know this is not perfect. It also requires a final date to be assigned to each profile, also a weakness of the process.
+
+
