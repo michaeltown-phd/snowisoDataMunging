@@ -3,6 +3,8 @@
 """
 Created on Wed Mar  9 14:57:13 2022
 
+exploratory analysis of relationship between d18O and dxs
+
 @author: michaeltown
 """
 
@@ -135,7 +137,7 @@ pptsym = 'ppt' # '\textperthousand'
 
 fileLoc = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/';
 figureLoc  ='/home/michaeltown/work/projects/snowiso/figures/EastGRIP/'
-fileNameIso = 'eastGRIP_SCisoData_2016-2019.pkl'
+fileNameIso = 'eastGRIP_SCisoData_2016-2019_acc_peaks.pkl'
 fileWrkngFldr = '/home/michaeltown/work/projects/snowiso/data/EastGRIP/workingFolder'
 df_iso = pd.read_pickle(fileLoc+fileNameIso);
 

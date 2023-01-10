@@ -770,4 +770,36 @@ SP5_20190626, 22.5
 SP5_20190715, 26.9 
 SP5_20190724, 29.1, 70.9,
 
+--> Snow temperatures and iso profiles
 
+looking at the isotope profiles from 2017-2019 in a vertical stack:
+snowCoreProfilesVertStack.py
+
+
+I have created several isotope contours for 2019. the code for whica can be found here:
+snowCoreListPeakValesAndAdjust.py
+
+looking at the snow temperatures, vapor pressures, vapor gradients, and hopefully vapor fluxes
+eastGRIPpromiceSnowTemperatures.py
+In this case there are notes in the code that indicate the snow temperatures at 75 cm are in error (seem too warm). TC7 is no good, TCtent is too warm.
+
+Some initial data munging of east grip meteo data are here:
+eastGRIPpromiceDataMunging.py
+
+
+19 July 2022
+--> reprocessing all the data to include the data reanalyzed in iceland. There may have been an issue with the deuterium data from iceland.
+
+The iceland-lab data had small errors in it with data being in the wrong columns. Several snow cores needed to be shifted over one column.
+
+the order of the processing code is:
+snowCoreDataMunging_metaData.py --> don't need to run this right now
+snowCoreDataMungingIceland.py
+snowCoreDataMunging.py
+snowCoreDataEDA_individualCores_2016-2019.py
+
+the next codes I will need to run to redo my graphs are:
+snowCore_dailyMeanProfiles_2017-2019.py
+snowCoreProfilesVertStack.py 
+d18Ovsdxs_2016-2019.py
+snowCoreDataAnalysis1_profiles_contourPlots.py
